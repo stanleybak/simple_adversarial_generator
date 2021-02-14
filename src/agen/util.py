@@ -185,6 +185,8 @@ def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
     assert len(lines) > 0
 
     for line in lines:
+        #print(f"Line: {line}")
+        
         groups = r.findall(line)
 
         if len(groups) == 0:
