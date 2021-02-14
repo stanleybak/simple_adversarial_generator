@@ -72,6 +72,8 @@ def model_convert(onnx_filename, vnnlib_filename, output_filename):
 
     i = onnx.helper.make_tensor_value_info('i', TensorProto.FLOAT, inp_shape)
 
+    # https://github.com/onnx/onnx/blob/master/docs/Operators.md#Max
+    
     # test matmul model
     # zero should map to the mean
     # one should map to the max
@@ -96,6 +98,12 @@ def model_convert(onnx_filename, vnnlib_filename, output_filename):
 
     combined = glue_models(model2_def, onnx_model)
 
+    #test_input = np.array([0.5, 0.5, 0.5, 0.5, 0.5], dtype=np.float32)
+    #test_input.shape = inp_shape # resshape order might matter for more than 1-d input
+
+    #test_output = predict_with_onnxruntime(onnx_model, test_input)
+    #print(f"test_output: {test_output}")
+
     onnx.save_model(combined, output_filename)
     print(f"Saved converted model to: {output_filename}")
 
@@ -118,8 +126,8 @@ def model_execute(onnx_filename, output_filename, input_box):
     scaled_input_list = []
 
     for lb, ub in input_box:
-        #r = np.random.random()
-        r = 0.0
+        r = np.random.random()
+        #r = 0.0
 
         input_list.append(lb + (ub - lb) * r)
         scaled_input_list.append(2*r - 1.0)
@@ -154,7 +162,7 @@ def main():
 
     input_box = model_convert(onnx_filename, vnnlib_filename, output_filename)
     
-    model_execute(onnx_filename, output_filename, input_box)
+    #model_execute(onnx_filename, output_filename, input_box)
 
 if __name__ == '__main__':
     main()
