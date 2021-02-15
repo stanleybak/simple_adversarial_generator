@@ -77,7 +77,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
 def main():
     'main entry point'
 
-    trials = 100
+    trials = 1000
     seed = 0
 
     assert len(sys.argv) >= 4, "expected at least 3 args: <onnx-filename> <vnnlib-filename> <output-filename> " + \
