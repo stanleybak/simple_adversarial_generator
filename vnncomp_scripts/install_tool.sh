@@ -13,6 +13,6 @@ fi
 
 echo "Installing $TOOL_NAME"
 
-PATH=$(dirname $(realpath $0))
+SCRIPT_PATH=$(dirname $(realpath $0))
 
-pip3 install -r "$PATH/../requirements.txt"
+pip3 install -r "$SCRIPT_PATH/../requirements.txt"
