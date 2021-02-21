@@ -17,7 +17,4 @@ DIR=$(dirname $(dirname $(realpath $0)))
 apt-get install -y python3 python3-pip &&
 apt-get install -y psmisc && # for killall, used in prepare_instance.sh script
 
-pip3 install -r "$DIR/requirements.txt" &&
-
-# setup environment variable for tool
-export PYTHONPATH="$PYTHONPATH:$DIR/src"
+pip3 install -r "$DIR/requirements.txt"
