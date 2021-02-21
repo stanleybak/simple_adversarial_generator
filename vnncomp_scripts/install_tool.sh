@@ -13,6 +13,9 @@ fi
 
 echo "Installing $TOOL_NAME"
 
-SCRIPT_PATH=$(dirname $(realpath $0))
+DIR=$(dirname $(dirname $(realpath $0)))
 
-pip3 install -r "$SCRIPT_PATH/../requirements.txt"
+pip3 install -r "$DIR/requirements.txt"
+
+# setup environment variable for tool
+export PYTHONPATH="$PYTHONPATH:$DIR/src"

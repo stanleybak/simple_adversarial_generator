@@ -20,8 +20,5 @@ TIMEOUT=$6
 
 echo "Running benchmark instance in category '$CATEGORY' with onnx file '$ONNX_FILE', vnnlib file '$VNNLIB_FILE', results file $RESULTS_FILE, and timeout $TIMEOUT"
 
-# setup environment variable for tool
-export PYTHONPATH="~/$TOOL_NAME/src"
-
 # run the tool to produce the results file
-python3 randgen.py \"$ONNX_FILE\" \"$VNNLIB_FILE\" \"$RESULTS_FILE\"
+python3 -m agen.randgen \"$ONNX_FILE\" \"$VNNLIB_FILE\" \"$RESULTS_FILE\"
