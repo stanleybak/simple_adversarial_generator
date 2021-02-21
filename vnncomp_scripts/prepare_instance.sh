@@ -20,3 +20,6 @@ echo "Preparing $TOOL_NAME for benchmark instance in category '$CATEGORY' with o
 
 # kill any zombie processes
 killall -q python3
+
+# script returns a 0 exit code if successful. If you want to skip a benchmark category you can return non-zero.
+exit 0
