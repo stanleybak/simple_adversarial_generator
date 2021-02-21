@@ -12,5 +12,7 @@ if [ "$1" != ${VERSION_STRING} ]; then
 fi
 
 echo "Installing $TOOL_NAME"
-cd ..
-pip3 install -r requirements.txt
+
+PATH=$(dirname $(realpath $0))
+
+pip3 install -r "$PATH/../requirements.txt"
