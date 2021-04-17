@@ -218,8 +218,6 @@ def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
 
         else:
             # output constraint
-            assert first.startswith("Y_")
-
             if op == ">=":
                 # swap order
                 first, second = second, first
