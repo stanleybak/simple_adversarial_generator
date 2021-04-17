@@ -172,6 +172,7 @@ def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
     #(assert (<= Y_0 Y_4))
 
     input_box = []
+    
     mat = []
     rhs_list = []
 
@@ -217,6 +218,7 @@ def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
 
         else:
             # output constraint
+            assert first.startswith("Y_")
 
             if op == ">=":
                 # swap order

@@ -9,7 +9,7 @@ import numpy as np
 
 import onnx
 
-from agen.util import read_vnnlib_simple, predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
+from util import read_vnnlib_simple, predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
 
 def run_tests(onnx_filename, vnnlib_filename, num_trials):
     '''execute the model and its conversion as a sanity check
@@ -25,6 +25,9 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
     
     inp_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in inp.type.tensor_type.shape.dim)
     out_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in out.type.tensor_type.shape.dim)
+
+    #print(f"inp_shape: {inp_shape}")
+    #print(f"out_shape: {out_shape}")
 
     num_inputs = 1
     num_outputs = 1
