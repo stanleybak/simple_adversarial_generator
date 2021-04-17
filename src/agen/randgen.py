@@ -9,7 +9,7 @@ import numpy as np
 
 import onnx
 
-from util import read_vnnlib_simple, predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
+from agen.util import read_vnnlib_simple, predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
 
 def run_tests(onnx_filename, vnnlib_filename, num_trials):
     '''execute the model and its conversion as a sanity check
