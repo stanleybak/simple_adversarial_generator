@@ -77,10 +77,10 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
 
             if sat:
                 print(f"Trial #{trial + 1} found sat case with input {input_list} and output {list(flat_out)}")
-                res = 'sat'
+                res = 'violated'
                 break
 
-        if res == 'sat':
+        if res == 'violated':
             break
 
     print(f"Result: {res}")
