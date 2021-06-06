@@ -9,7 +9,8 @@ import numpy as np
 
 import onnx
 
-from agen.util import read_vnnlib_simple, predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
+from agen.util import predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
+from agen.vnnlib import read_vnnlib_simple
 
 def run_tests(onnx_filename, vnnlib_filename, num_trials):
     '''execute the model and its conversion as a sanity check
@@ -40,7 +41,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
 
     print(f"Testing onnx model with {num_inputs} inputs and {num_outputs} outputs")
 
-    input_box, prop_mat, prop_rhs = read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs)
+    box_spec_list = read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs)
 
     # use random input to validate conversion
 
@@ -50,6 +51,11 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
 
     for trial in range(num_trials):
 
+        index = np.random.randint(len(box_spec_list))
+        box_spec = box_spec_list[index]
+        input_box = box_spec[0]
+        spec_list = box_spec[1]
+
         input_list = []
 
         for lb, ub in input_box:
@@ -58,19 +64,23 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
             input_list.append(lb + (ub - lb) * r)
 
         random_input = np.array(input_list, dtype=np.float32)
-        random_input.shape = inp_shape # resshape order might matter for more than 1-d input
+        random_input = random_input.reshape(inp_shape, order='F') # check if reshape order is correct
+        assert random_input.shape == inp_shape
 
         output = predict_with_onnxruntime(onnx_model, random_input)
 
-        flat_out = np.ravel(output)
+        flat_out = output.flatten('F') # check order
 
-        vec = prop_mat.dot(flat_out)
+        for prop_mat, prop_rhs in spec_list:
+            vec = prop_mat.dot(flat_out)
+            sat = np.all(vec <= prop_rhs)
 
-        sat = np.all(vec <= prop_rhs)
+            if sat:
+                print(f"Trial #{trial + 1} found sat case with input {input_list} and output {list(flat_out)}")
+                res = 'sat'
+                break
 
-        if sat:
-            print(f"Trial #{trial + 1} found sat case with input {input_list} and output {list(flat_out)}")
-            res = 'sat'
+        if res == 'sat':
             break
 
     print(f"Result: {res}")
@@ -80,7 +90,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
 def main():
     'main entry point'
 
-    trials = 1000
+    trials = 100
     seed = 0
 
     assert len(sys.argv) >= 4, "expected at least 3 args: <onnx-filename> <vnnlib-filename> <output-filename> " + \

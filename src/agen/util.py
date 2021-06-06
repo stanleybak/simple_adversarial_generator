@@ -7,11 +7,8 @@ Feb 2021
 
 from itertools import chain
 
-import re
 import onnx
 import onnxruntime as ort
-
-import numpy as np
 
 def predict_with_onnxruntime(model_def, *inputs):
     'run an onnx model'
@@ -49,7 +46,7 @@ def remove_unused_initializers(model):
             print(f"removing unused initializer {init.name}")
 
     graph = onnx.helper.make_graph(model.graph.node, model.graph.name, model.graph.input,
-                        model.graph.output, new_init)
+                                   model.graph.output, new_init)
 
     onnx_model = make_model_with_graph(model, graph)
 
@@ -150,101 +147,3 @@ def glue_models(model1, model2):
 
     return onnx_model
 
-def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
-    '''process in a vnnlib file
-
-    this is not a general parser, and assumes files are provided in a 'nice' format
-
-    outputs:
-    1. input ranges (box), list of pairs
-    2. output matrix, mat * y <= rhs
-    3. output rhs vector, mat * y <= rhs
-    '''
-
-    #; Unscaled Input 4: (960, 1200)
-    #(assert (<= X_4 0.5))
-    #(assert (>= X_4 0.3))
-
-    #; output constraints (property 3, sat if CoC is minimal)
-    #(assert (<= Y_0 Y_1))
-    #(assert (<= Y_0 Y_2))
-    #(assert (<= Y_0 Y_3))
-    #(assert (<= Y_0 Y_4))
-
-    input_box = []
-    
-    mat = []
-    rhs_list = []
-
-    r = re.compile(r"^\(assert \((<=|>=) (\S+) (\S+)\)\)$") 
-
-    with open(vnnlib_filename, 'r') as f:
-        lines = f.readlines()
-
-    lines = [line.rstrip() for line in lines]
-
-    assert len(lines) > 0
-
-    for line in lines:
-        #print(f"Line: {line}")
-        
-        groups = r.findall(line)
-
-        if len(groups) == 0:
-            continue
-
-        groups = groups[0]
-        assert len(groups) == 3
-        
-        op, first, second = groups
-
-        if first.startswith("X_"):
-            # Input constraints
-            index = int(first[2:])
-
-            if index == len(input_box):
-                if len(input_box) > 0:
-                    assert input_box[-1][0] != -np.inf, f"lower bound for X_{index-1} not set"
-                    assert input_box[-1][1] != np.inf, f"upper bound for X_{index-1} not set"
-
-                input_box.append([-np.inf, np.inf])
-
-            assert index == len(input_box) - 1
-
-            if op == "<=":
-                input_box[-1][1] = float(second)
-            else:
-                input_box[-1][0] = float(second)
-
-        else:
-            # output constraint
-            if op == ">=":
-                # swap order
-                first, second = second, first
-
-            row = [0.0] * num_outputs
-            rhs = 0.0
-
-            # assume op is <=
-            if first.startswith("Y_") and second.startswith("Y_"):
-                index1 = int(first[2:])
-                index2 = int(second[2:])
-
-                row[index1] = 1
-                row[index2] = -1
-            elif first.startswith("Y_"):
-                index1 = int(first[2:])
-                row[index1] = 1
-                rhs = float(second)
-            else:
-                assert second.startswith("Y_")
-                index2 = int(second[2:])
-                row[index2] = -1
-                rhs = -1 * float(second)
-
-            mat.append(row)
-            rhs_list.append(rhs)
-
-    assert len(input_box) == num_inputs
-            
-    return input_box, np.array(mat, dtype=float), np.array(rhs_list, dtype=float) 

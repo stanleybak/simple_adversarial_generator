@@ -3,7 +3,6 @@
 # six arguments, first is "v1", second is a benchmark category itentifier string such as "acasxu", third is path to the .onnx file, fourth is path to .vnnlib file, fifth is a path to the results file, and sixth is a timeout in seconds.
 # Stanley Bak, Feb 2021
 
-TOOL_NAME=simple_adv_gen
 VERSION_STRING=v1
 
 # check arguments
