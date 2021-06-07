@@ -12,7 +12,7 @@ import onnx
 from agen.util import predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
 from agen.vnnlib import read_vnnlib_simple
 
-def run_tests(onnx_filename, vnnlib_filename, num_trials):
+def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
     '''execute the model and its conversion as a sanity check
 
     returns string to print to output file
@@ -64,12 +64,12 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials):
             input_list.append(lb + (ub - lb) * r)
 
         random_input = np.array(input_list, dtype=np.float32)
-        random_input = random_input.reshape(inp_shape, order='F') # check if reshape order is correct
+        random_input = random_input.reshape(inp_shape, order=flatten_order) # check if reshape order is correct
         assert random_input.shape == inp_shape
 
         output = predict_with_onnxruntime(onnx_model, random_input)
 
-        flat_out = output.flatten('F') # check order
+        flat_out = output.flatten(flatten_order) # check order
 
         for prop_mat, prop_rhs in spec_list:
             vec = prop_mat.dot(flat_out)
@@ -92,9 +92,10 @@ def main():
 
     trials = 100
     seed = 0
+    flatten_order = 'C'
 
     assert len(sys.argv) >= 4, "expected at least 3 args: <onnx-filename> <vnnlib-filename> <output-filename> " + \
-        f"[<trials>] [<seed>] got {len(sys.argv)}"
+        f"[<trials>] [<seed>] [<flatten order ('C' or 'F')>] got {len(sys.argv)}"
 
     onnx_filename = sys.argv[1]
     vnnlib_filename = sys.argv[2]
@@ -105,6 +106,10 @@ def main():
 
     if len(sys.argv) > 5:
         seed = int(sys.argv[5])
+
+    if len(sys.argv) > 6:
+        flatten_order = sys.argv[6]
+        assert flatten_order in ['F', 'C']
 
     print(f"doing {trials} random trials with random seed {seed}")
 
