@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/stanleybak/simple_adversarial_generator.svg?branch=main)](https://travis-ci.com/stanleybak/simple_adversarial_generator)
+
 # simple_adversarial_generator
 Simple adversarial input generator for VNN-COMP using random inputs. In the future we may add true adversarial example generation like PGD.
 
