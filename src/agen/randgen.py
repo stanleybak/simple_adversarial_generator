@@ -4,6 +4,7 @@ random test generation to find unsat systems
 Stanley Bak, Feb 2021
 '''
 
+import time
 import sys
 import numpy as np
 
@@ -41,10 +42,14 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
 
     print(f"Testing onnx model with {num_inputs} inputs and {num_outputs} outputs")
 
+    start = time.perf_counter()
     box_spec_list = read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs)
+    diff = time.perf_counter() - start
+    print(f"Parse time: {round(diff, 3)} sec")
 
     # use random input to validate conversion
 
+    start = time.perf_counter()
     inp, _ = get_io_nodes(onnx_model)
     inp_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in inp.type.tensor_type.shape.dim)
     res = 'unknown'
@@ -83,6 +88,9 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
         if res == 'violated':
             break
 
+    diff = time.perf_counter() - start
+    print(f"Test time: {round(diff, 3)} sec")
+
     print(f"Result: {res}")
 
     return res
@@ -90,7 +98,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
 def main():
     'main entry point'
 
-    trials = 100
+    trials = 10
     seed = 0
     flatten_order = 'C'
 
