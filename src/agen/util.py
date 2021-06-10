@@ -10,6 +10,8 @@ from itertools import chain
 import onnx
 import onnxruntime as ort
 
+import numpy as np
+
 def predict_with_onnxruntime(model_def, *inputs):
     'run an onnx model'
     
@@ -53,7 +55,7 @@ def remove_unused_initializers(model):
     return onnx_model
 
 def get_io_nodes(onnx_model):
-    'returns single input and output nodes'
+    'returns 3 -tuple: input node, output nodes, input dtype'
 
     sess = ort.InferenceSession(onnx_model.SerializeToString())
     inputs = [i.name for i in sess.get_inputs()]
@@ -68,7 +70,13 @@ def get_io_nodes(onnx_model):
     inp = [n for n in g.input if n.name == input_name][0]
     out = [n for n in g.output if n.name == output_name][0]
 
-    return inp, out
+    input_type = g.input[0].type.tensor_type.elem_type
+
+    assert input_type in [onnx.TensorProto.FLOAT, onnx.TensorProto.DOUBLE]
+
+    dtype = np.float32 if input_type == onnx.TensorProto.FLOAT else np.float64
+
+    return inp, out, dtype
 
 def make_model_with_graph(model, graph, ir_version=None, check_model=True):
     'copy a model with a new graph'

@@ -23,7 +23,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
     onnx.checker.check_model(onnx_model, full_check=True)
     onnx_model = remove_unused_initializers(onnx_model)
 
-    inp, out = get_io_nodes(onnx_model)
+    inp, out, inp_dtype = get_io_nodes(onnx_model)
     
     inp_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in inp.type.tensor_type.shape.dim)
     out_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in out.type.tensor_type.shape.dim)
@@ -47,10 +47,8 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
     diff = time.perf_counter() - start
     print(f"Parse time: {round(diff, 3)} sec")
 
-    # use random input to validate conversion
-
     start = time.perf_counter()
-    inp, _ = get_io_nodes(onnx_model)
+    #inp, _ = get_io_nodes(onnx_model)
     inp_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in inp.type.tensor_type.shape.dim)
     res = 'unknown'
 
@@ -68,7 +66,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
 
             input_list.append(lb + (ub - lb) * r)
 
-        random_input = np.array(input_list, dtype=np.float32)
+        random_input = np.array(input_list, dtype=inp_dtype)
         random_input = random_input.reshape(inp_shape, order=flatten_order) # check if reshape order is correct
         assert random_input.shape == inp_shape
 
