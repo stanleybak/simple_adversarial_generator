@@ -1,6 +1,5 @@
 #!/bin/bash
-# example prepare_instance.sh script for VNNCOMP for simple_adversarial_generator (https://github.com/stanleybak/simple_adversarial_generator) 
-# four arguments, first is "v1", second is a benchmark category identifier string such as "acasxu", third is path to the .onnx file and fourth is path to .vnnlib file
+# example prepare_instance.sh script for VNNCOMP for nnenum # four arguments, first is "v1", second is a benchmark category identifier string such as "acasxu", third is path to the .onnx file and fourth is path to .vnnlib file
 # Stanley Bak, Feb 2021
 
 TOOL_NAME=simple_adv_gen
@@ -22,4 +21,9 @@ echo "Preparing $TOOL_NAME for benchmark instance in category '$CATEGORY' with o
 killall -q python3
 
 # script returns a 0 exit code if successful. If you want to skip a benchmark category you can return non-zero.
-exit 0
+if [ "$CATEGORY" = "test" -o "$CATEGORY" == "acasxu" ]
+then
+	exit 0
+fi
+
+exit 1

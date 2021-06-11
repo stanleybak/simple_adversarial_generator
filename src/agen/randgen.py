@@ -10,8 +10,8 @@ import numpy as np
 
 import onnx
 
-from agen.util import predict_with_onnxruntime, remove_unused_initializers, get_io_nodes
-from agen.vnnlib import read_vnnlib_simple
+from agen.util import predict_with_onnxruntime, remove_unused_initializers
+from agen.vnnlib import read_vnnlib_simple, get_io_nodes
 
 def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
     '''execute the model and its conversion as a sanity check
