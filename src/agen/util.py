@@ -54,30 +54,6 @@ def remove_unused_initializers(model):
 
     return onnx_model
 
-def get_io_nodes(onnx_model):
-    'returns 3 -tuple: input node, output nodes, input dtype'
-
-    sess = ort.InferenceSession(onnx_model.SerializeToString())
-    inputs = [i.name for i in sess.get_inputs()]
-    assert len(inputs) == 1, f"expected single onnx network input, got: {inputs}"
-    input_name = inputs[0]
-
-    outputs = [o.name for o in sess.get_outputs()]
-    assert len(outputs) == 1, f"expected single onnx network output, got: {outputs}"
-    output_name = outputs[0]
-
-    g = onnx_model.graph
-    inp = [n for n in g.input if n.name == input_name][0]
-    out = [n for n in g.output if n.name == output_name][0]
-
-    input_type = g.input[0].type.tensor_type.elem_type
-
-    assert input_type in [onnx.TensorProto.FLOAT, onnx.TensorProto.DOUBLE]
-
-    dtype = np.float32 if input_type == onnx.TensorProto.FLOAT else np.float64
-
-    return inp, out, dtype
-
 def make_model_with_graph(model, graph, ir_version=None, check_model=True):
     'copy a model with a new graph'
 

@@ -6,9 +6,12 @@ June 2021
 '''
 
 from copy import deepcopy
+import re
 
 import numpy as np
-import re
+
+import onnxruntime as ort
+import onnx
 
 def read_statements(vnnlib_filename):
     '''process vnnlib and return a list of strings (statements)
@@ -122,8 +125,50 @@ def make_input_box_dict(num_inputs):
 
     return rv
 
+def get_io_nodes(onnx_model):
+    'returns 3 -tuple: input node, output nodes, input dtype'
+
+    sess = ort.InferenceSession(onnx_model.SerializeToString())
+    inputs = [i.name for i in sess.get_inputs()]
+    assert len(inputs) == 1, f"expected single onnx network input, got: {inputs}"
+    input_name = inputs[0]
+
+    outputs = [o.name for o in sess.get_outputs()]
+    assert len(outputs) == 1, f"expected single onnx network output, got: {outputs}"
+    output_name = outputs[0]
+
+    g = onnx_model.graph
+    inp = [n for n in g.input if n.name == input_name][0]
+    out = [n for n in g.output if n.name == output_name][0]
+
+    input_type = g.input[0].type.tensor_type.elem_type
+
+    assert input_type in [onnx.TensorProto.FLOAT, onnx.TensorProto.DOUBLE]
+
+    dtype = np.float32 if input_type == onnx.TensorProto.FLOAT else np.float64
+
+    return inp, out, dtype
+
+def get_num_inputs_outputs(onnx_filename):
+    'get num inputs and outputs of an onnx file'
+
+    onnx_model = onnx.load(onnx_filename)
+    inp, out, _ = get_io_nodes(onnx_model)
+    
+    inp_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in inp.type.tensor_type.shape.dim)
+    out_shape = tuple(d.dim_value if d.dim_value != 0 else 1 for d in out.type.tensor_type.shape.dim)
+
+    num_inputs = 1
+    num_outputs = 1
+
+    for n in inp_shape:
+        num_inputs *= n
+
+    for n in out_shape:
+        num_outputs *= n
+
 def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
-    '''process in a vnnlib file
+    '''process in a vnnlib file. You can get num_inputs and num_outputs using get_num_inputs_outputs().
 
     this is not a general parser, and assumes files are provided in a 'nice' format. Only a single disjunction
     is allowed

@@ -5,9 +5,6 @@ dist: xenial
 
 language: python
 
-dist:
- - trusty
-
 services:
   - docker
 
