@@ -21,9 +21,9 @@ echo "Preparing $TOOL_NAME for benchmark instance in category '$CATEGORY' with o
 killall -q python3
 
 # script returns a 0 exit code if successful. If you want to skip a benchmark category you can return non-zero.
-if [ "$CATEGORY" = "test" -o "$CATEGORY" == "acasxu" ]
-then
-	exit 0
-fi
+#if [ "$CATEGORY" = "test" -o "$CATEGORY" == "acasxu" ]
+#then
+#	exit 0
+#fi
 
-exit 1
+exit 0
