@@ -199,10 +199,12 @@ def read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs):
     rv = [] # list of 3-tuples, (box-dict, mat, rhs)
     rv.append((make_input_box_dict(num_inputs), [], []))
     
+    #print("Reading vnnlib file...")
     lines = read_statements(vnnlib_filename)
 
-    for line in lines:
-        #print(f"Line: {line}")
+    for index, line in enumerate(lines):
+        # print
+        #print(f"line {index+1}/{len(lines)}: {line}")
 
         if len(regex_declare.findall(line)) > 0:
             continue

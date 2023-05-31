@@ -45,7 +45,7 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
     start = time.perf_counter()
     box_spec_list = read_vnnlib_simple(vnnlib_filename, num_inputs, num_outputs)
     diff = time.perf_counter() - start
-    print(f"Parse time: {round(diff, 3)} sec")
+    print(f"Parse time: {round(diff, 3)} sec.")
 
     start = time.perf_counter()
     #inp, _ = get_io_nodes(onnx_model)
