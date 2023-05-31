@@ -10,8 +10,8 @@ import numpy as np
 
 import onnx
 
-from agen.util import predict_with_onnxruntime, remove_unused_initializers
-from agen.vnnlib import read_vnnlib_simple, get_io_nodes
+from util import predict_with_onnxruntime, remove_unused_initializers
+from vnnlib import read_vnnlib_simple, get_io_nodes
 
 def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
     '''execute the model and its conversion as a sanity check
@@ -79,17 +79,34 @@ def run_tests(onnx_filename, vnnlib_filename, num_trials, flatten_order='C'):
             sat = np.all(vec <= prop_rhs)
 
             if sat:
-                print(f"Trial #{trial + 1} found sat case with input {input_list} and output {list(flat_out)}")
-                res = 'violated'
+                print(f"Trial #{trial + 1} found sat case with first 25 input {input_list[:25]} and output: {list(flat_out)[:25]}")
+                res = 'sat'
+
+                for index, x in enumerate(input_list):
+                    # print lines like: " (X_0 0.97500000000000000)"
+                    if index == 0:
+                        res += "\n("
+                    else:
+                        res += "\n "
+
+                    res += f"(X_{index} {x})"
+
+                # next print the Y values
+                for index, x in enumerate(flat_out):
+                    # print lines like: " (Y_0 0.97500000000000000)"
+                    res += f"\n (Y_{index} {x})"
+
+                res += ")\n"
                 break
 
-        if res == 'violated':
+        if res.startswith('sat'):
             break
 
     diff = time.perf_counter() - start
     print(f"Test time: {round(diff, 3)} sec")
 
-    print(f"Result: {res}")
+    baseres = res.split("\n")[0]
+    print(f'Result: {baseres}')
 
     return res
 
